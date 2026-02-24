@@ -13,7 +13,7 @@ PAT = re.compile(r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\
 
 def pre_tokenization(chunk, special_tokens) -> list[str]:
     if not special_tokens:
-        return [m.groups() for m in PAT.finditer(chunk)]
+        return [m.group() for m in PAT.finditer(chunk)]
     
     special_set = set(special_tokens)
     sorted_special = sorted(special_tokens, key=len, reverse=True)
@@ -81,4 +81,8 @@ class BPEtokenizer:
                 desired_num_chunks = num_chunks,
                 split_special_token = special_tokens[0].encode("utf-8")
             )
-        
+
+        # 并行处理
+        print("start multiprocessing")
+        num_cpu = multiprocessing.cpu_count()
+        tasks = []
