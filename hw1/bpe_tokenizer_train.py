@@ -21,7 +21,7 @@ def gpt2_bytes_to_unicode_local():
             cs.append(2**8 + n)
             n += 1
     ch = [chr(n) for n in cs]
-    return dict(zip(bs, cs))
+    return dict(zip(bs, ch))
 
 def get_stats(token_sequences: List[List[str]]) -> collections.Counter:
     """
@@ -29,7 +29,7 @@ def get_stats(token_sequences: List[List[str]]) -> collections.Counter:
     """
     pair_counts = collections.Counter()
     for sequence in token_sequences:
-        for i in range(len(token_sequences) - 1):
+        for i in range(len(sequence) - 1):
             pair = (sequence[i], sequence[i+1])
             pair_counts[pair] += 1
     return pair_counts
@@ -122,8 +122,8 @@ def run_train_bpe(
     try:
         with open(input_path, "r", encoding="utf-8", errors="ignore") as f:
             text = f.read()
-        except FileNotFoundError:
-            text = ""
+    except FileNotFoundError:
+        text = ""
     
     # 对语料库里的文段进行简单的预分词：注意按要求要保留空格分割文本，得到“单词”列表["hello"," world"]
     # raw_words: List[str] = text.split()
