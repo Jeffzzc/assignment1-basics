@@ -183,3 +183,86 @@ def run_train_bpe(
             p2_str = p2.decode("utf-8", errors="replace")
             f.write(f"{p1_str} {p2_str}\n")
     return vocab, merges # 返回最终的词汇表和合并记录
+
+def main():
+    print("=" * 80)
+    print("[1] gpt2_bytes_to_unicode_local() -> full 0..255 mapping")
+    print("=" * 80)
+
+    m = gpt2_bytes_to_unicode_local()
+    print(f"Total mappings: {len(m)}")
+    # 按 byte 顺序打印完整映射
+    for i in range(256):
+        print(f"{i:3d} (0x{i:02X}) -> {repr(m[i])}")
+
+    print("\n" + "=" * 80)
+    print("[2] get_stats() demo -> top adjacent pairs")
+    print("=" * 80)
+
+    demo_sequences = [
+        list("hello"),
+        list(" world"),   # 注意带空格
+        list("hello world"),
+    ]
+    pair_counts = get_stats(demo_sequences)
+    print(f"Total unique pairs: {len(pair_counts)}")
+    topk = 10
+    print(f"Top {topk} pairs:")
+    for (a, b), c in pair_counts.most_common(topk):
+        print(f"  ({repr(a)}, {repr(b)}) -> {c}")
+
+    print("\n" + "=" * 80)
+    print("[3] merge_pair_in_sequences() demo")
+    print("=" * 80)
+
+    seq = [list("hello")]
+    pair_to_merge = ("l", "l")
+    merged = merge_pair_in_sequences(seq, pair_to_merge, "ll")
+    print("Before:", seq)
+    print("Merge pair:", pair_to_merge, "as", repr("ll"))
+    print("After :", merged)
+
+    print("\n" + "=" * 80)
+    print("[4] run_train_bpe() -> train once and show vocab/merges summary")
+    print("=" * 80)
+
+    # 你可以按需改这几个参数
+    input_path = "train.txt"          # 没有也没关系：你的函数会走 FileNotFoundError -> text=""
+    vocab_size = 300                  # 先小一点，避免输出/文件太大
+    special_tokens = ["<pad>", "<bos>", "<eos>"]
+
+    vocab, merges = run_train_bpe(
+        input_path=input_path,
+        vocab_size=vocab_size,
+        special_tokens=special_tokens,
+    )
+
+    print(f"Trained vocab size: {len(vocab)} (target={vocab_size})")
+    print(f"Total merges: {len(merges)}")
+
+    # 打印 vocab 前几项 / 最后几项（避免全量刷屏）
+    def _print_vocab_slice(title: str, items):
+        print(title)
+        for tid, tbytes in items:
+            # bytes 用 latin-1 或 replace 方便显示
+            print(f"  id={tid:4d} bytes={tbytes}  as_str={tbytes.decode('utf-8', errors='replace')}")
+
+    vocab_items = sorted(vocab.items(), key=lambda x: x[0])
+    _print_vocab_slice("\nVocab first 20:", vocab_items[:20])
+    _print_vocab_slice("\nVocab last  20:", vocab_items[-20:])
+
+    # 打印 merges 前几条 / 后几条
+    def _print_merges_slice(title: str, ms):
+        print(title)
+        for p1, p2 in ms:
+            p1s = p1.decode("utf-8", errors="replace")
+            p2s = p2.decode("utf-8", errors="replace")
+            print(f"  ({repr(p1s)}, {repr(p2s)})  raw=({p1}, {p2})")
+
+    _print_merges_slice("\nMerges first 20:", merges[:20])
+    _print_merges_slice("\nMerges last  20:", merges[-20:])
+
+    print("\nFiles written: vocab.json, merges.txt")
+        
+if __name__ == "__main__":
+    main()
