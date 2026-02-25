@@ -264,5 +264,5 @@ def main():
 
     print("\nFiles written: vocab.json, merges.txt")
         
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
