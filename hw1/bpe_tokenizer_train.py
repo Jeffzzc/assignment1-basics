@@ -112,3 +112,31 @@ def run_train_bpe(
             token_frequency_table[merged_sequence] += frequency
 
     return vocab, merges
+
+def main():
+    # 测试文件路径（这里直接创建一个字符串模拟）
+    input_text = """hello hello world. this is a test text for BPE encoding. hello world"""
+
+    # 为了模拟文件，我们将文本写入一个临时文件中
+    input_path = "test_corpus.txt"
+    with open(input_path, "w", encoding="utf-8") as f:
+        f.write(input_text)
+
+    # 假设我们要训练一个包含两个特殊符号的分词器
+    special_tokens = [" ", "<|pad|>"]
+    vocab_size = 200  # 设置一个小的词汇表大小，方便查看输出
+
+    # 运行训练
+    vocab, merges = run_train_bpe(input_path=input_path, vocab_size=vocab_size, special_tokens=special_tokens)
+
+    # 输出生成的词汇表和合并规则
+    print("Vocabulary:")
+    for token_id, token in vocab.items():
+        print(f"{token_id}: {token}")
+
+    print("\nMerges:")
+    for merge in merges:
+        print(merge)
+
+if __name__ == "__main__":
+    main()
