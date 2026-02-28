@@ -11,6 +11,7 @@ from torch import Tensor
 
 from hw1.bpe_tokenizer_train import run_train_bpe as bpe
 from hw2.implementing_the_tokenizer import implement_bpe_tokenizer as tokenizer
+from hw3.rope import RoPE
 
 def run_linear(
     d_in: int,
@@ -202,7 +203,14 @@ def run_rope(
     Returns:
         Float[Tensor, " ... sequence_length d_k"]: Tensor with RoPEd input.
     """
-    raise NotImplementedError
+    # 创建 RoPE 对象
+    rope = RoPE(theta=theta, d_k=d_k, max_seq_len=max_seq_len, device=in_query_or_key.device)
+
+    # 调用 RoPE 的 forward 方法来计算 RoPE 编码后的张量
+    out = rope(in_query_or_key, token_positions)
+
+    # 返回 RoPE 编码后的输出
+    return out
 
 
 def run_transformer_block(
